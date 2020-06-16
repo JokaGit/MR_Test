@@ -71,21 +71,22 @@ def create_file(username, info):
         print(f'Не удалось создать файл для пользователя {username}.')
 
 
+def string_process(line):
+    if len(line) > 50:
+        return line[0: 50] + '...\n'
+    else:
+        return line + '\n'
+
+
 def parse_tasks_by_user(user):
     us_tasks = ['', '']
 
     for task in tasks_import:
         if task.get('userId') == user.get('id'):
             if task.get('completed'):
-                if len(task.get('title')) > 50:
-                    us_tasks[0] += task.get('title')[0: 50] + '...\n'
-                else:
-                    us_tasks[0] += task.get('title') + '\n'
+                us_tasks[0] += string_process(task.get('title'))
             else:
-                if len(task.get('title')) > 50:
-                    us_tasks[1] += task.get('title')[0: 50] + '...\n'
-                else:
-                    us_tasks[1] += task.get('title') + '\n'
+                us_tasks[1] += string_process(task.get('title'))
 
     return us_tasks
 
