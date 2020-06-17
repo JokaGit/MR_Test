@@ -1,8 +1,8 @@
 import sys
-import requests
 import os
-import time
+import requests
 import datetime
+import time
 
 # Избыточные переменные и операции для того чтобы последовательно обработать исключения на разных стадиях
 users_import = None
@@ -99,7 +99,7 @@ for user in users_import:
                 f"{user.get('company').get('name')}\n\n"
 
     user_tasks = parse_tasks_by_user(user)
-    if user_tasks == ['', '']:
+    if len(user_tasks) == 0:
         tasks = 'Задач нет.'
     else:
         tasks = f"Завершённые задачи:\n" \
