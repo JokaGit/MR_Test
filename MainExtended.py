@@ -4,17 +4,15 @@ import requests
 import datetime
 import time
 
-# Избыточные переменные и операции для того чтобы последовательно обработать исключения на разных стадиях
+
 users_import = None
 tasks_import = None
-users_response = None
-tasks_response = None
-
+# Избыточные операции для того чтобы последовательно обработать исключения на разных стадиях.
 try:
-    users_response = requests.get('https://json.medrating.org/users')
-    tasks_response = requests.get('https://json.medrating.org/todos')
+    users_import = requests.get('https://json.medrating.org/users')
+    tasks_import = requests.get('https://json.medrating.org/todos')
 except requests.exceptions.ConnectionError as exc:
-    print(f'Проблемы с соединением; возможно, не доступен сервер. Попробуйте еще раз. Отчёт:\n\n{exc}')
+    print(f'Проблемы с соединением; возможно, недоступен сервер. Попробуйте еще раз. Отчёт:\n\n{exc}')
     exit()
 except requests.exceptions.HTTPError as exc:
     print(f'Ошибка в HTTP запросе. Отчёт:\n\n{exc}')
@@ -22,13 +20,14 @@ except requests.exceptions.HTTPError as exc:
 except requests.exceptions.ContentDecodingError as exc:
     print(f'Ошибка при декодировании информации. Отчёт:\n\n{exc}')
     exit()
-except ValueError as exc:
-    print(f'Ошибка при декодировании информации. Отчёт:\n\n{exc}')
+# Например, если URL неверный, то response принимается, но пустой (при этом все равно в content 2 элемента).
+if len(users_import.content) < 3 or len(tasks_import.content) < 3:
+    print('Не приняты данные по пользователям и/или задачам.')
     exit()
 
 try:
-    users_import = users_response.json()
-    tasks_import = tasks_response.json()
+    users_import = users_import.json()
+    tasks_import = tasks_import.json()
 except ValueError as exc:
     print(f'Ошибка при десериализации JSON. Отчёт:\n\n{exc}')
     exit()
@@ -38,16 +37,11 @@ def create_file(username, info):
     if not os.path.exists(os.getcwd() + '/tasks/'):
         os.mkdir(os.getcwd() + '/tasks/')
 
-    try:
-        os.mkdir(os.getcwd() + '/tasks/')
-    except OSError:
-        pass
-
     filepath = f"tasks/{username}.txt"
 
     # Проверяем наличие файла
     if os.path.exists(filepath):
-        # Винда не поддерживает двоеточие в названии файла, так что небольшое отступление от задания
+        # Винда не поддерживает двоеточие в названии файла, так что небольшое отступление от задания.
         if sys.platform == 'win32':
             cr_time = time.strftime('%Y-%m-%dT%H.%M', time.localtime(os.path.getmtime(filepath)))
         else:
